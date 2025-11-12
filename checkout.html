@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Finalizar Compra - EZ.IMPORTTE</title>
+  <style>
+    /* Reset y base */
+    * { box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fff; min-height:100vh; display:flex; flex-direction:column; }
+    a { text-decoration:none; color:inherit; }
+
+    header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 20px; border-bottom:1px solid #ddd; background:#fff; position:sticky; top:0; z-index:100;
+    }
+    .header-title { font-weight:900; font-size:22px; margin-left:10px; }
+
+    main {
+      flex-grow:1; max-width:800px; margin:20px auto; padding:0 20px; display:flex; flex-direction:column; gap:20px;
+    }
+    h1 { text-align:center; font-size:28px; font-weight:900; color:#3b0aff; margin-bottom:20px; }
+    .total { font-size:24px; font-weight:700; text-align:center; margin-bottom:30px; }
+    .payment-options { display:flex; flex-direction:column; gap:16px; align-items:center; }
+    .payment-options button {
+      width:100%; max-width:300px; padding:12px 20px; font-size:16px; font-weight:700;
+      border:none; border-radius:8px; cursor:pointer; transition:0.3s; color:white;
+    }
+    #btn-mercadopago { background:#ffce00; color:black; }
+    #btn-mercadopago:hover { background:#e6b800; }
+    #btn-transferencia { background:rebeccapurple; }
+    #btn-transferencia:hover { background:#5b04b7; }
+    #btn-efectivo { background:#3ebaff; }
+    #btn-efectivo:hover { background:#129de8; color:white; }
+
+    footer { text-align:center; padding:12px 0; font-size:14px; color:#666; border-top:1px solid #ddd; margin-top:20px; }
+
+    /* Modal Transferencia */
+    #transfer-modal {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:300;
+    }
+    #transfer-modal.active { display:flex; }
+    #transfer-modal .modal-content {
+      background:#fff; padding:24px 30px; border-radius:12px; max-width:400px; width:90%;
+      box-shadow:0 4px 15px rgba(0,0,0,0.3); text-align:center; position:relative;
+    }
+    #transfer-modal .modal-content h2 { margin-top:0; color:rebeccapurple; }
+    #transfer-modal .modal-content p { font-size:16px; margin:12px 0; }
+    #transfer-modal .close-btn {
+      position:absolute; top:10px; right:10px; background:none; border:none; font-size:24px; cursor:pointer; color:#333;
+    }
+
+    @media(max-width:480px){ main { padding:0 12px; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex; align-items:center;">
+    <div class="logo">
+      <img src="logo.jpg" alt="Logo EZ.IMPORTTE" style="height:50px; border:none;">
+    </div>
+    <div class="header-title">EZ.IMPORTTE</div>
+  </div>
+</header>
+
+<main>
+  <h1>Finalizar Compra</h1>
+  <div class="total" id="total">Total: $0</div>
+
+  <div class="payment-options">
+    <button id="btn-mercadopago">Pagar con Mercado Pago</button>
+    <button id="btn-transferencia">Pagar por Transferencia</button>
+    <button id="btn-efectivo">Pagar en Efectivo</button>
+  </div>
+</main>
+
+<!-- Modal Transferencia -->
+<div id="transfer-modal">
+  <div class="modal-content">
+    <button class="close-btn" aria-label="Cerrar">&times;</button>
+    <h2>Datos para Transferencia</h2>
+    <p><strong>Billetera</strong> Mercado Pago</p>
+    <p><strong>Titular</strong> Ezequiel acuña</p>
+    <p><strong>CBU:</strong> 0000003100092373582517</p>
+    <p><strong>Alias:</strong> ezequielacuna.mp</p>
+    <p>Una vez realizada la transferencia, envíanos el comprobante.</p>
+  </div>
+</div>
+
+<footer>
+  &copy; 2025 EZ.IMPORTTE - Todos los derechos reservados
+</footer>
+
+<script>
+  // Obtener total desde URL
+  const params = new URLSearchParams(window.location.search);
+  const total = params.get("total") || 0;
+  document.getElementById("total").textContent = "Total: $" + Number(total).toLocaleString();
+
+  document.getElementById("btn-mercadopago").addEventListener('click', () => {
+    alert("Ir a Mercado Pago con total $" + Number(total).toLocaleString());
+    // Integración real de Mercado Pago aquí
+  });
+
+  document.getElementById("btn-efectivo").addEventListener('click', () => {
+    alert("Se coordina entrega en efectivo.");
+  });
+
+  // Modal transferencia
+  const transferModal = document.getElementById('transfer-modal');
+  document.getElementById('btn-transferencia').addEventListener('click', () => {
+    transferModal.classList.add('active');
+  });
+  transferModal.querySelector('.close-btn').addEventListener('click', () => {
+    transferModal.classList.remove('active');
+  });
+  transferModal.addEventListener('click', (e) => {
+    if(e.target === transferModal) transferModal.classList.remove('active');
+  });
+</script>
+
+</body>
+</html>

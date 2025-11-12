@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EZ.IMPORTTE</title>
+  <style>
+
+.product-options {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px; /* espacio entre cantidad y botón */
+}
+
+.product-price {
+  text-align: center;
+  display: block;
+  margin-bottom: 5px;
+}
+
+    
+    /* Reset y base */
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a {
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      border-bottom: 1px solid #ddd;
+      background: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .header-title {
+      font-weight: 900;
+      font-size: 22px;
+      margin-left: 10px;
+    }
+    #cart-icon {
+      font-size: 28px;
+      cursor: pointer;
+      position: relative;
+    }
+    #cart-count {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #8200ff;
+      color: white;
+      font-size: 14px;
+      border-radius: 50%;
+      padding: 2px 7px;
+      font-weight: bold;
+    }
+
+    /* Página inicial de categorías */
+    #categories-page {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin: 30px 20px;
+      flex-wrap: wrap;
+    }
+    .category-card {
+      position: relative;
+      width: 280px;
+      height: 380px;
+      border: 3px solid rebeccapurple;
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 4px 7px rgb(0 0 0 / 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .category-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    .category-card:hover img {
+      transform: scale(1.1);
+    }
+    .category-label {
+      position: absolute;
+      bottom: 25%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255 255 255 / 0.75);
+      padding: 8px 22px;
+      color: black;
+      font-weight: 900;
+      font-size: 22px;
+      border-radius: 40px;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    /* Sección de productos */
+    #products-page {
+      flex-grow: 1;
+      padding: 20px 40px 80px;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: none;
+      flex-direction: column;
+    }
+    #products-page.active {
+      display: flex;
+    }
+
+    #back-button {
+      font-weight: 700;
+      background: rebeccapurple;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      font-size: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-bottom: 18px;
+      width: max-content;
+      align-self: flex-start;
+      user-select: none;
+    }
+
+    h2.category-title {
+      background: #3ebaff;
+      text-align: center;
+      font-weight: 900;
+      font-size: 36px;
+      color: black;
+      padding: 12px 0;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      user-select: none;
+    }
+
+    /* Filtros de marca */
+    #filter-brands {
+      display: flex;
+      gap: 18px;
+      margin-bottom: 18px;
+      user-select: none;
+    }
+    #filter-brands button {
+      background: none;
+      border: none;
+      font-weight: bold;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 6px 14px;
+      border-radius: 20px;
+      transition:
+        background-color 0.25s ease,
+        color 0.25s ease;
+    }
+    #filter-brands button.active,
+    #filter-brands button:hover {
+      background-color: rebeccapurple;
+      color: white;
+    }
+
+    /* Productos grid */
+    #products-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+    .product-card {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: white;
+      box-shadow: 0 3px 4px rgb(0 0 0 / 0.1);
+      user-select: none;
+    }
+    .product-card img {
+      width: 190px;
+      height: 250px;
+      object-fit: cover;
+      border: 1px solid #bbb;
+      margin-bottom: 8px;
+      border-radius: 4px;
+    }
+    .product-name {
+      font-weight: 700;
+      font-size: 16px;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .product-desc {
+      font-style: italic;
+      font-weight: 400;
+      font-size: 14px;
+      margin-bottom: 8px;
+      min-height: 34px;
+      text-align: center;
+      color: #555;
+    }
+    .product-price {
+      font-weight: 700;
+      font-size: 15px;
+      margin: 6px 0 8px 0;
+      user-select: text;
+    }
+
+    .quantity-selector {
+      display: inline-flex;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      overflow: hidden;
+      user-select: none;
+      align-items: center;
+      margin-right: 8px;
+    }
+    .quantity-selector button {
+      padding: 2px 10px;
+      background: #eee;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      color: #333;
+      font-weight: 700;
+      user-select: none;
+    }
+    .quantity-selector input {
+      width: 36px;
+      text-align: center;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      font-weight: 600;
+      user-select: text;
+    }
+
+    .add-cart-btn {
+      cursor: pointer;
+      background: rebeccapurple;
+      color: white;
+      border: none;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 12px;
+      border-radius: 40px;
+      transition: background-color 0.35s ease;
+      user-select: none;
+    }
+    .add-cart-btn:hover {
+      background-color: #5b04b7;
+    }
+
+
+
+    /* Carrito */
+    #cart-modal {
+      position: fixed;
+      top: 60px;
+      right: 20px;
+      width: 340px;
+      max-height: calc(100vh - 80px);
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      display: none;
+      flex-direction: column;
+      z-index: 200;
+      overflow-y: auto;
+      user-select: none;
+    }
+    #cart-modal.active {
+      display: flex;
+    }
+    #cart-modal header {
+      background: rebeccapurple;
+      color: white;
+      padding: 12px 18px;
+      font-weight: 900;
+      font-size: 20px;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #cart-modal header button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 22px;
+      cursor: pointer;
+    }
+    #cart-items-list {
+      padding: 10px;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+    .cart-item {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #ccc;
+      padding: 6px 0;
+    }
+    .cart-item img {
+      width: 60px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-right: 10px;
+      border: 1px solid #aaa;
+      flex-shrink: 0;
+    }
+    .cart-item-info {
+      flex-grow: 1;
+    }
+    .cart-item-name {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+    .cart-item-qty {
+      display: inline-flex;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .cart-item-price {
+      font-weight: 700;
+      color: #2a2a2a;
+      font-size: 14px;
+    }
+    .cart-qty-button {
+      background: rebeccapurple;
+      border: none;
+      color: white;
+      font-weight: 700;
+      font-size: 16px;
+      width: 26px;
+      height: 26px;
+      line-height: 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      user-select: none;
+      margin: 0 4px;
+    }
+    .cart-remove-btn {
+      background: #c22222;
+      color: white;
+      font-size: 14px;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 6px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    #cart-total {
+      padding: 16px 18px;
+      font-size: 18px;
+      font-weight: 900;
+      border-top: 1px solid #ccc;
+      text-align: right;
+      user-select: text;
+    }
+
+    #checkout-btn {
+      background: #3ebaff;
+      border: none;
+      padding: 10px 14px;
+      margin: 12px 20px 20px;
+      font-size: 18px;
+      font-weight: 900;
+      color: black;
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+    #checkout-btn:hover {
+      background-color: #129de8;
+      color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 720px) {
+      #products-page {
+        padding: 12px 10px 60px;
+      }
+      #categories-page {
+        gap: 14px;
+      }
+      .category-card {
+        width: 90vw;
+        height: 320px;
+      }
+      #cart-modal {
+        width: 90vw;
+        right: 5vw;
+      }
+    }
+
+    .soon-label {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: #fc1f02; /* Amarillo tipo alerta */
+  color: #000;
+  font-weight: bold;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+
+/* Asegurate de que las tarjetas de producto permitan posicionamiento absoluto */
+.product-card {
+  position: relative;
+}
+
+
+  </style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex; align-items:center;">
+    <div class="logo">
+     <img src="logo.jpg" alt="Logo EZ.IMPORTTE" style="height:50px; border:none;">
+    </div>
+    <div class="header-title">EZ.IMPORTTE</div>
+  </div>
+  <div id="cart-icon" aria-label="Carrito de compras" tabindex="0">
+    🛒
+    <div id="cart-count" aria-live="polite" aria-atomic="true" style="display:none;">0</div>
+  </div>
+</header>
+
+<main>
+  <!-- Página inicial - categorías -->
+  <section id="categories-page" role="list" aria-label="Categorías de productos">
+    <div class="category-card" data-category="vapers" role="listitem" tabindex="0" aria-label="Categoría Vapers">
+      <img src="supreme.jpg" alt="Imagen categoría Vapers" />
+      <div class="category-label">Vapers</div>
+    </div>
+    <div class="category-card" data-category="tecnologia" role="listitem" tabindex="0" aria-label="Categoría Tecnología">
+      <img src="tecnologia.jpg" alt="Imagen categoría Tecnología" />
+      <div class="category-label">Tecnología</div>
+    </div>
+  </section>
+
+  <!-- Sección productos -->
+  <section id="products-page" aria-live="polite" aria-label="Lista de productos">
+    <button id="back-button" aria-label="Volver a la selección de categorías">&larr; Volver</button>
+    <h2 class="category-title" id="category-title"></h2>
+    <nav id="filter-brands" aria-label="Filtros de marcas"></nav>
+    <div id="products-list" role="list" aria-live="polite"></div>
+  </section>
+
+  <!-- Modal carrito -->
+  <aside id="cart-modal" role="dialog" aria-modal="true" aria-labelledby="cart-title">
+    <header>
+      <span id="cart-title">Carrito de compras</span>
+      <button id="close-cart" aria-label="Cerrar carrito">&times;</button>
+    </header>
+    <section id="cart-items-list" role="list" aria-live="polite"></section>
+    <div id="cart-total" aria-live="polite" aria-atomic="true">Total: $0</div>
+    <button id="checkout-btn" aria-label="Finalizar compra">Comprar</button>
+  </aside>
+</main>
+
+<script>
+  
+  // Datos productos prueba simple ;)
+  const productsDB = {
+    vapers: [
+      {
+        id: 'vaper1',
+        brand: 'Lost Gal',
+        name: 'Lost Gal 25.000',
+        description: 'Hasta 25.000 puffs, Batería recargable de 650 mAh con puerto USB-C de carga rápida, Resistencia mesh coil, Pantalla LED, 5 % de nicotina.',
+        image: 'lostgal.jpg',
+        price1: 23500,
+        price2: 44000
+      },
+      {
+        id: 'vaper2',
+        brand: 'Supreme',
+        name: 'Supreme 18.000 Puff',
+        description: 'Hasta 18.000 puffs, Batería recargable de 650 mAh con puerto USB-C de carga rápida, Resistencia mesh coil,  Pantalla LED, 5 % de nicotina.',
+        image: 'supreme.jpg',
+        price1: 22000,
+        price2: 40000
+      },
+      {
+        id: 'vaper3',
+        brand: 'Elfbar',
+        name: 'ELFBAR 40.000 Puff – Ice King Edition',
+        description: 'Hasta 40.000 puffs reales, Modos de vapeo ajustables: Soft, Normal y Boost,  Pantalla digital integrada, Recargable por USB-C, Sabores fríos y mentolados.',
+        image: 'elfbar.jpg',
+        price1: 33000,
+        price2: 60000
+      },
+      {
+        id: 'vaper4',
+        brand: 'Elfbar',
+        name: ' Elfbar 40.000 Puff Trío',
+        description: 'Hasta 40.000 puffs, 3 modos de vapeo: Ice, Sweet y Sour, Doble resistencia mesh coil, Batería recargable de 650 mAh con puerto USB-C y pantalla LED, 5 % de nicotina. ',
+        image: 'elfbartrio.jpg',
+        price1: 35000,
+        price2: 66000
+      },
+      {
+        id: 'vaper5',
+        brand: 'Luffbar',
+        name: 'Luffbar 40.000 Puff',
+        description: '40.000 puffs, Triple modo de vapeo, Doble resistencia mesh coil, Batería recargable de 650 mAh con puerto USB-C y pantalla LED indicadora de batería y líquido, 5 % de nicotina.',
+        image: 'luffbar.jpg',
+        price1: 28000,
+        price2: 54000
+      }
+    ],
+    tecnologia: [
+      {
+        id: 'tec1',
+        brand: 'Productos',
+        name: ' Mini Cooling Fan 3 en 1 / Ventilador + Humidificador + Luz LED ',
+        description: 'Disponible en ⚫ negro y  en ⚪ blanco',
+        image: 'ventilador.jpg',
+        price1: 30000,
+        price2: 0
+      },
+      {
+        id: 'tec2',
+        brand: 'Pantalla Led',
+        name: 'LED Flexible Screen 38×9,5 cm (AUTO)',
+        description: 'Mostrá texto animado, fotos, imágenes, GIFs, dibujos (graffiti) y hasta relojes digitales, Se controla con la app ILEDColor (Android/iOS) por Bluetooth, Ideal para autos, vidrieras, etc, Pantalla flexible y liviana, con brillo regulable, Se alimenta por USB (cargador, powerbank o toma del auto) ',
+        image: 'carteled2.jpg',
+        price1: 59999,
+        price2: 100000
+      },
+      {
+        id: 'tec3',
+        brand: 'Pantalla Led',
+        name: 'LED Flexible Screen 58×12 cm (AUTO-CAMIONETA-CAMIÓN)',
+        description: 'Mostrá texto animado, fotos, imágenes, GIFs, dibujos (graffiti) y hasta relojes digitales, Se controla con la app ILEDColor (Android/iOS) por Bluetooth, Ideal para autos, vidrieras, etc, Pantalla flexible y liviana, con brillo regulable, Se alimenta por USB (cargador, powerbank o toma del auto) ',
+        image: 'carteled.jpg',
+        price1: 89999,
+        price2: 169999
+      },
+      {
+        id: 'tec4',
+        brand: 'Infladores',
+        name: ' Inflador Portátil 12V (Conexión al auto)',
+        description: 'Una opción práctica, confiable y económica, Conexión directa al encendedor del auto (12V), Compatible con autos, motos, bicis y pelotas, Incluye manguera flexible, adaptadores y boquillas.',
+        image: 'inflador1.jpg',
+        price1: 44999,
+        price2: 0
+      },
+      {
+        id: 'tec5',
+        brand: 'Infladores',
+        name: 'Inflador Portátil Digital + Power Bank + Linterna LED',
+        description:'El compañero ideal para emergencias y viajes, Función 3 en 1: inflador, power bank para cargar tu celular y linterna LED integrada, Pantalla digital: control preciso de la presión, Compatible con autos, motos, bicicletas y más, Incluye manguera, adaptadores y cable de carga USB.',
+        image: 'inflador2.jpg',
+        price1: 59999,
+        price2: 0
+      },
+      {
+  id: 'tec6',
+  brand: 'Productos',
+  name: 'Dinosaurio Inflable a Control Remoto',
+  description: 'Inflado y desinflado automático con solo presionar un botón, Movimientos 360°: avanza, retrocede, gira y se mueve hacia los costados,  Rugido realista,  Ideal para interiores o exteriores,  Control total, 130 cm (alto) x 60 cm (ancho) x 190 cm (largo), 👶 Edad recomendada: desde 3 años',
+  image: 'Dino.jpg',
+  price1: 99000, // No tiene precio todavía
+  price2: 0,
+  upcoming: true // 👈 esto es lo importante
+}
+
+    ],
+    
+  };
+
+  
+  let cart = [];
+  let currentCategory = null;
+  let currentBrandFilter = 'TODO';
+
+  const categoriesPage = document.getElementById('categories-page');
+  const productsPage = document.getElementById('products-page');
+  const categoryTitleEl = document.getElementById('category-title');
+  const productsListEl = document.getElementById('products-list');
+  const filterBrandsEl = document.getElementById('filter-brands');
+  const backButton = document.getElementById('back-button');
+  const cartIcon = document.getElementById('cart-icon');
+  const cartCountEl = document.getElementById('cart-count');
+  const cartModal = document.getElementById('cart-modal');
+  const cartItemsList = document.getElementById('cart-items-list');
+  const cartTotalEl = document.getElementById('cart-total');
+  const closeCartBtn = document.getElementById('close-cart');
+  const checkoutBtn = document.getElementById('checkout-btn');
+
+  // Mostrar categorías inicial
+  function showCategories() {
+    categoriesPage.style.display = 'flex';
+    productsPage.classList.remove('active');
+    currentCategory = null;
+    currentBrandFilter = 'TODO';
+  }
+  
+
+  // Mostrar productos por categoría y filtro marca
+  function showProducts(category) {
+    currentCategory = category;
+    categoryTitleEl.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+
+    // Mostrar filtro de marcas
+    renderFilterBrands();
+
+    // Mostrar productos
+    renderProducts();
+
+    categoriesPage.style.display = 'none';
+    productsPage.classList.add('active');
+  }
+
+  // Renderizar filtro marcas
+  function renderFilterBrands() {
+    filterBrandsEl.innerHTML = '';
+    const products = productsDB[currentCategory];
+    const brandsSet = new Set(products.map(p => p.brand));
+    const brands = Array.from(brandsSet).sort();
+
+    // Añadir botón TODO (todos)
+    const btnAll = document.createElement('button');
+    btnAll.textContent = 'TODO';
+    btnAll.classList.toggle('active', currentBrandFilter === 'TODO');
+    btnAll.addEventListener('click', () => {
+      currentBrandFilter = 'TODO';
+      renderFilterBrands();
+      renderProducts();
+    });
+    filterBrandsEl.appendChild(btnAll);
+
+    // Botones marcas
+    brands.forEach(br => {
+      const btn = document.createElement('button');
+      btn.textContent = br;
+      btn.classList.toggle('active', currentBrandFilter === br);
+      btn.addEventListener('click', () => {
+        currentBrandFilter = br;
+        renderFilterBrands();
+        renderProducts();
+      });
+      filterBrandsEl.appendChild(btn);
+    });
+  }
+
+  // Renderizar productos segun filtro
+  function renderProducts() {
+    productsListEl.innerHTML = '';
+    const products = productsDB[currentCategory];
+    const filtered = (currentBrandFilter === 'TODO') ? products : products.filter(p => p.brand === currentBrandFilter);
+
+    if (filtered.length === 0) {
+      productsListEl.innerHTML = '<p>No hay productos en esta categoría con ese filtro.</p>';
+      return;
+    }
+
+    filtered.forEach(prod => {
+      const card = document.createElement('article');
+      card.className = 'product-card';
+
+    card.innerHTML = `
+  <div class="soon-label" style="${prod.upcoming ? '' : 'display:none;'}">PRÓXIMAMENTE</div>
+  <img src="${prod.image}" alt="Imagen de ${prod.name}">
+  <div class="product-name">${prod.name}</div>
+  <div class="product-desc">${prod.description}</div>
+  <div class="product-options">
+    <div>
+      <span class="product-price">${currentCategory === 'perfumes' ? '5ML' : 'X1 c/u'} $${prod.price1.toLocaleString()}</span>
+      <span class="quantity-selector" data-prod-id="${prod.id + '_1'}">
+        <button class="qty-minus">-</button>
+        <input type="number" min="0" value="0" step="1" ${prod.upcoming ? 'disabled' : ''}/>
+        <button class="qty-plus">+</button>
+      </span>
+      <button class="add-cart-btn" data-prod-id="${prod.id + '_1'}" ${prod.upcoming ? 'disabled' : ''}>AGREGAR</button>
+    </div>
+    <div>
+      <span class="product-price">${currentCategory === 'perfumes' ? '10ML' : 'X2'} $${prod.price2.toLocaleString()}</span>
+      <span class="quantity-selector" data-prod-id="${prod.id + '_2'}">
+        <button class="qty-minus">-</button>
+        <input type="number" min="0" value="0" step="1" ${prod.upcoming ? 'disabled' : ''}/>
+        <button class="qty-plus">+</button>
+      </span>
+      <button class="add-cart-btn" data-prod-id="${prod.id + '_2'}" ${prod.upcoming ? 'disabled' : ''}>AGREGAR</button>
+    </div>
+  </div>
+`;
+
+
+
+      productsListEl.appendChild(card);
+    });
+
+    // Añadir event listeners a cantidades y botones
+    productsListEl.querySelectorAll('.quantity-selector').forEach(selector => {
+      const minusBtn = selector.querySelector('.qty-minus');
+      const plusBtn = selector.querySelector('.qty-plus');
+      const input = selector.querySelector('input');
+
+      minusBtn.addEventListener('click', () => {
+        let val = parseInt(input.value);
+        if (val > 0) {
+          input.value = val - 1;
+        }
+      });
+      plusBtn.addEventListener('click', () => {
+        let val = parseInt(input.value);
+        input.value = val + 1;
+      });
+    });
+
+    productsListEl.querySelectorAll('.add-cart-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const prodIdUnit = btn.getAttribute('data-prod-id'); // ej: vaper1_1 o vaper2_2
+        const qtySelector = productsListEl.querySelector(`.quantity-selector[data-prod-id="${prodIdUnit}"] input`);
+        let qty = parseInt(qtySelector.value);
+        if (qty <= 0 || isNaN(qty)) {
+          alert('Por favor selecciona una cantidad mayor a 0.');
+          return;
+        }
+        addToCart(prodIdUnit, qty);
+        qtySelector.value = 0;
+      });
+    });
+  }
+
+  // Añadir producto al carrito
+  // prodIdUnit: ej 'vaper1_1' => el sufijo _1 o _2 indica si es unidad simple o doble unidad
+  function addToCart(prodIdUnit, qty) {
+    // Dividir id y unidades
+    const [prodId, units] = prodIdUnit.split('_');
+
+    // Buscar producto en DB
+    let product = null;
+    outer:
+    for (const cat in productsDB) {
+      for (const p of productsDB[cat]) {
+        if (p.id === prodId) {
+          product = p;
+          break outer;
+        }
+      }
+    }
+    if (!product) return;
+
+    // El precio dependerá de si unidades es 1 o 2
+    const price = units === '2' ? product.price2 : product.price1;
+
+    // Chequear si ya está en carrito (mismo id + unidades)
+    const index = cart.findIndex(c => c.prodId === prodId && c.units === units);
+    if (index === -1) {
+      cart.push({ prodId, units, qty, price, name: product.name, image: product.image });
+    } else {
+      // Incrementar cantidad
+      cart[index].qty += qty;
+    }
+    updateCartCount();
+    renderCart();
+  }
+
+  // Contar cantidad total productos carrito
+  function updateCartCount() {
+    let totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+    if (totalQty === 0) {
+      cartCountEl.style.display = 'none';
+    } else {
+      cartCountEl.style.display = 'block';
+      cartCountEl.textContent = totalQty;
+    }
+  }
+
+  // Renderizar carrito
+  function renderCart() {
+    cartItemsList.innerHTML = '';
+
+    if (cart.length === 0) {
+      cartItemsList.innerHTML = '<p style="padding: 12px; text-align:center; font-style: italic;">Carrito vacío.</p>';
+      cartTotalEl.textContent = 'Total: $0';
+      checkoutBtn.disabled = true;
+      checkoutBtn.style.opacity = '0.5';
+      return;
+    }
+    checkoutBtn.disabled = false;
+    checkoutBtn.style.opacity = '1';
+
+    cart.forEach((item, i) => {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'cart-item';
+
+      itemDiv.innerHTML = `
+        <img src="${item.image}" alt="Foto ${item.name}" />
+        <div class="cart-item-info">
+          <div class="cart-item-name">${item.name} (x${item.units})</div>
+          <div class="cart-item-qty" aria-label="Cantidad de ${item.name}">
+            <button class="cart-qty-button" aria-label="Disminuir cantidad" data-index="${i}" data-action="minus">-</button>
+            <span>${item.qty}</span>
+            <button class="cart-qty-button" aria-label="Aumentar cantidad" data-index="${i}" data-action="plus">+</button>
+          </div>
+          <div class="cart-item-price">Subtotal: $${(item.price * item.qty).toLocaleString()}</div>
+        </div>
+        <button class="cart-remove-btn" aria-label="Eliminar ${item.name}" data-index="${i}">&times;</button>
+      `;
+      cartItemsList.appendChild(itemDiv);
+    });
+
+    const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+    cartTotalEl.textContent = `Total: $${total.toLocaleString()}`;
+
+    // Añadir eventos botones cantidad
+    cartItemsList.querySelectorAll('.cart-qty-button').forEach(btn => {
+      btn.onclick = () => {
+        let index = parseInt(btn.getAttribute('data-index'));
+        let action = btn.getAttribute('data-action');
+        if (action === 'minus') {
+          if (cart[index].qty > 1) {
+            cart[index].qty--;
+          } else {
+            // Confirmar eliminación si quiere cantidad 0
+            if (confirm('¿Desea eliminar el producto del carrito?')) {
+              cart.splice(index, 1);
+            }
+          }
+        } else if (action === 'plus') {
+          cart[index].qty++;
+        }
+        updateCartCount();
+        renderCart();
+      };
+    });
+
+    // Botón eliminar producto
+    cartItemsList.querySelectorAll('.cart-remove-btn').forEach(btn => {
+      btn.onclick = () => {
+        let index = parseInt(btn.getAttribute('data-index'));
+        if (confirm('¿Confirma eliminar el producto?')) {
+          cart.splice(index, 1);
+          updateCartCount();
+          renderCart();
+        }
+      };
+    });
+  }
+
+  // Toggle carrito visible
+  function toggleCart() {
+    if (cartModal.classList.contains('active')) {
+      cartModal.classList.remove('active');
+    } else {
+      cartModal.classList.add('active');
+    }
+  }
+
+  // Event listeners
+  categoriesPage.querySelectorAll('.category-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const category = card.dataset.category;
+      showProducts(category);
+    });
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const category = card.dataset.category;
+        showProducts(category);
+      }
+    });
+  });
+  backButton.addEventListener('click', () => {
+    showCategories();
+  });
+  cartIcon.addEventListener('click', toggleCart);
+  closeCartBtn.addEventListener('click', toggleCart);
+
+  checkoutBtn.addEventListener('click', () => {
+  if (cart.length === 0) {
+    alert('El carrito está vacío');
+    return;
+  }
+
+  const total = cart.reduce((sum, i) => sum + (i.qty * i.price), 0);
+
+  // Redirigir a página de pago personalizada
+  window.location.href = "checkout.html?total=" + total;
+});
+
+
+
+  if (product.comingSoon) {
+  const label = document.createElement('span');
+  label.classList.add('soon-label');
+  label.textContent = '🚀 Próximamente';
+  card.appendChild(label);
+}
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
