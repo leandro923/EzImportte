@@ -4,62 +4,212 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Finalizar Compra - EZ.IMPORTTE</title>
+
   <style>
-    /* Reset y base */
-    * { box-sizing: border-box; }
-    body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fff; min-height:100vh; display:flex; flex-direction:column; }
-    a { text-decoration:none; color:inherit; }
+    /* Reset */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* Colores de marca */
+    :root {
+      --primary: #8200ff;
+      --dark: #131313;
+      --light: #ffffff;
+      --gray: #555;
+    }
+
+    body {
+      font-family: 'Arial', sans-serif;
+      background: var(--dark);
+      color: var(--light);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* HEADER */
     header {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:10px 20px; border-bottom:1px solid #ddd; background:#fff; position:sticky; top:0; z-index:100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: rgba(19,19,19,0.85);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      position: sticky;
+      top: 0;
+      z-index: 200;
     }
-    .header-title { font-weight:900; font-size:22px; margin-left:10px; }
 
+    .header-title {
+      font-size: 24px;
+      font-weight: 900;
+      color: var(--primary);
+      margin-left: 8px;
+    }
+
+    .logo img {
+      height: 50px;
+      border-radius: 8px;
+    }
+
+    /* MAIN */
     main {
-      flex-grow:1; max-width:800px; margin:20px auto; padding:0 20px; display:flex; flex-direction:column; gap:20px;
+      max-width: 800px;
+      width: 100%;
+      margin: 30px auto;
+      padding: 0 20px;
+      text-align: center;
     }
-    h1 { text-align:center; font-size:28px; font-weight:900; color:#3b0aff; margin-bottom:20px; }
-    .total { font-size:24px; font-weight:700; text-align:center; margin-bottom:30px; }
-    .payment-options { display:flex; flex-direction:column; gap:16px; align-items:center; }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 900;
+      margin-bottom: 15px;
+      color: var(--primary);
+      text-shadow: 0 0 10px rgba(130,0,255,0.4);
+    }
+
+    .total {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 35px;
+      color: var(--light);
+    }
+
+    /* BOTONES */
+    .payment-options {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      align-items: center;
+    }
+
     .payment-options button {
-      width:100%; max-width:300px; padding:12px 20px; font-size:16px; font-weight:700;
-      border:none; border-radius:8px; cursor:pointer; transition:0.3s; color:white;
+      width: 90%;
+      max-width: 330px;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.25s ease;
+      letter-spacing: 0.5px;
+      transform: translateY(0);
     }
-    #btn-mercadopago { background:#ffce00; color:black; }
-    #btn-mercadopago:hover { background:#e6b800; }
-    #btn-transferencia { background:rebeccapurple; }
-    #btn-transferencia:hover { background:#5b04b7; }
-    #btn-efectivo { background:#3ebaff; }
-    #btn-efectivo:hover { background:#129de8; color:white; }
 
-    footer { text-align:center; padding:12px 0; font-size:14px; color:#666; border-top:1px solid #ddd; margin-top:20px; }
+    #btn-mercadopago {
+      background: #ffce00;
+      color: #000;
+      box-shadow: 0 4px 12px rgba(255,206,0,0.3);
+    }
+    #btn-mercadopago:hover {
+      background: #e5b800;
+      transform: translateY(-3px);
+    }
 
-    /* Modal Transferencia */
+    #btn-transferencia {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(130,0,255,0.4);
+    }
+    #btn-transferencia:hover {
+      background: #6900cc;
+      transform: translateY(-3px);
+    }
+
+    #btn-efectivo {
+      background: #3ebaff;
+      color: #000;
+      box-shadow: 0 4px 12px rgba(62,186,255,0.4);
+    }
+    #btn-efectivo:hover {
+      background: #129de8;
+      transform: translateY(-3px);
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 15px 0;
+      font-size: 14px;
+      color: #aaa;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      margin-top: auto;
+    }
+
+    /* MODAL TRANSFERENCIA */
     #transfer-modal {
-      position: fixed; top:0; left:0; width:100%; height:100%;
-      background: rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:300;
-    }
-    #transfer-modal.active { display:flex; }
-    #transfer-modal .modal-content {
-      background:#fff; padding:24px 30px; border-radius:12px; max-width:400px; width:90%;
-      box-shadow:0 4px 15px rgba(0,0,0,0.3); text-align:center; position:relative;
-    }
-    #transfer-modal .modal-content h2 { margin-top:0; color:rebeccapurple; }
-    #transfer-modal .modal-content p { font-size:16px; margin:12px 0; }
-    #transfer-modal .close-btn {
-      position:absolute; top:10px; right:10px; background:none; border:none; font-size:24px; cursor:pointer; color:#333;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
     }
 
-    @media(max-width:480px){ main { padding:0 12px; } }
+    #transfer-modal.active { display: flex; }
+
+    #transfer-modal .modal-content {
+      background: rgba(255,255,255,0.15);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: white;
+      padding: 30px 28px;
+      border-radius: 14px;
+      text-align: center;
+      width: 90%;
+      max-width: 420px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+      animation: fadeUp 0.25s ease;
+    }
+
+    @keyframes fadeUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    #transfer-modal h2 {
+      color: var(--primary);
+      margin-bottom: 15px;
+      font-weight: 900;
+    }
+
+    #transfer-modal p {
+      font-size: 16px;
+      margin: 10px 0;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 26px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .close-btn:hover {
+      color: var(--primary);
+      transform: scale(1.2);
+    }
+
   </style>
 </head>
+
 <body>
 
 <header>
   <div style="display:flex; align-items:center;">
     <div class="logo">
-      <img src="logo.jpg" alt="Logo EZ.IMPORTTE" style="height:50px; border:none;">
+      <img src="logo.jpg" alt="Logo EZ.IMPORTTE">
     </div>
     <div class="header-title">EZ.IMPORTTE</div>
   </div>
@@ -76,16 +226,18 @@
   </div>
 </main>
 
-<!-- Modal Transferencia -->
+<!-- MODAL TRANSFERENCIA -->
 <div id="transfer-modal">
   <div class="modal-content">
     <button class="close-btn" aria-label="Cerrar">&times;</button>
     <h2>Datos para Transferencia</h2>
-    <p><strong>Billetera</strong> Mercado Pago</p>
-    <p><strong>Titular</strong> Ezequiel acuña</p>
+
+    <p><strong>Billetera:</strong> Mercado Pago</p>
+    <p><strong>Titular:</strong> Ezequiel Acuña</p>
     <p><strong>CBU:</strong> 0000003100092373582517</p>
     <p><strong>Alias:</strong> ezequielacuna.mp</p>
-    <p>Una vez realizada la transferencia, envíanos el comprobante.</p>
+
+    <p>Una vez realizada la transferencia, envianos el comprobante.</p>
   </div>
 </div>
 
@@ -94,30 +246,46 @@
 </footer>
 
 <script>
-  // Obtener total desde URL
   const params = new URLSearchParams(window.location.search);
   const total = params.get("total") || 0;
   document.getElementById("total").textContent = "Total: $" + Number(total).toLocaleString();
 
   document.getElementById("btn-mercadopago").addEventListener('click', () => {
-    alert("Ir a Mercado Pago con total $" + Number(total).toLocaleString());
-    // Integración real de Mercado Pago aquí
+    localStorage.setItem("total", total);
+    localStorage.setItem("pedido", "Compra en EZ.IMPORTTE"); 
+    window.location.href = "TU_LINK_DE_MERCADO_PAGO";
   });
 
   document.getElementById("btn-efectivo").addEventListener('click', () => {
-    alert("Se coordina entrega en efectivo.");
-  });
+  const numero = "543435024639"; // WhatsApp destino
+  const total = localStorage.getItem("total") || 0;
+  const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
 
-  // Modal transferencia
+  // Armar el texto del pedido
+  let pedido = carrito.map(item => `${item.cantidad} x ${item.nombre}`).join("\n");
+
+  // Mensaje completo
+  const mensaje = `Hola! Quiero hacer mi pedido:\n${pedido}\nTotal: $${Number(total).toLocaleString()}`;
+
+  // Codificar correctamente el mensaje para WhatsApp
+  const url = `https://api.whatsapp.com/send?phone=${numero}&text=${encodeURIComponent(mensaje)}`;
+
+  // Abrir WhatsApp
+  window.open(url, "_blank");
+});
+
+
   const transferModal = document.getElementById('transfer-modal');
   document.getElementById('btn-transferencia').addEventListener('click', () => {
     transferModal.classList.add('active');
   });
+
   transferModal.querySelector('.close-btn').addEventListener('click', () => {
     transferModal.classList.remove('active');
   });
+
   transferModal.addEventListener('click', (e) => {
-    if(e.target === transferModal) transferModal.classList.remove('active');
+    if (e.target === transferModal) transferModal.classList.remove('active');
   });
 </script>
 
