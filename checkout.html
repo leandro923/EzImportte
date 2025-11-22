@@ -133,14 +133,14 @@ btnMercadoPago.addEventListener('click',()=>{alert('Integración Mercado Pago aq
 
 // Botón Efectivo/WhatsApp
 btnEfectivo.addEventListener('click',()=>{
-let msg="¡Hola! Quiero confirmar mi pedido y pagar en efectivo/transferencia. Los detalles son:\n\n";
+let msg="¡Hola! Quiero confirmar mi pedido y pagar en efectivo. Los detalles son:\n\n";
 cart.forEach(item=>{
 const subtotal=item.price*item.qty;
 const unitLabel=item.units==='2'?'x2':'x1 c/u';
 msg+=`* ${item.name} (${unitLabel}) x ${item.qty} uni.: $${subtotal.toLocaleString()}\n`;
 });
 msg+=`\n*TOTAL A PAGAR: $${finalTotal.toLocaleString()}*`;
-msg+="\n\nPor favor, confírmame el punto de entrega y los pasos a seguir.";
+msg+="\n\nPor favor, confírmame el punto de entrega y los pasos a buscar.";
 const url=`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
 window.open(url,"_blank");
 });
@@ -176,3 +176,4 @@ uploadBtn.addEventListener('click',()=>{myWidget.open();}, false);
 </script>
 </body>
 </html>
+
