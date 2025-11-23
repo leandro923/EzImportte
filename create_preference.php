@@ -1,92 +1,69 @@
 ﻿<?php
-// Esto es un ejemplo conceptual. Debes usar el SDK oficial de Mercado Pago.
+// 1. Cargar el autoloader de Composer (NECESARIO)
+require __DIR__ . '/vendor/autoload.php';
 
-// ----------------------------------------------------
-// ⚠️ REEMPLAZA CON TUS VALORES REALES DE PRODUCCIÓN
-// ----------------------------------------------------
-$ACCESS_TOKEN = "TU_ACCESS_TOKEN_DE_MERCADO_PAGO"; // CLAVE SECRETA!
-$WHATSAPP_NUMBER = "54911xxxxxxxx"; // Tu número (incluyendo código de país sin el +)
-$BACKEND_URL = "https://tu-sitio.com/create_preference.php"; // URL de tu script de backend
-// ----------------------------------------------------
+// --- CONFIGURACIÓN Y CLAVES SECRETAS ---
 
-// 1. Recibir los datos del carrito desde el frontend (POST)
-$data = json_decode(file_get_contents('php://input'), true);
-$cart = $data['cart'] ?? [];
+// ⚠️ 1. PEGA AQUÍ TU ACCESS TOKEN SECRETO 🔑
+const ACCESS_TOKEN = 'APP_USR-1466628612664002-112217-72308268e4c7420287664c356fbbadd9-1020356369'; 
+// ⚠️ 2. PEGA AQUÍ LA URL BASE DE TU SITIO 🌐 (ej: https://tudominio.com)
+const BASE_URL = 'https://leandro923.github.io/EzImportte/'; 
+// ⚠️ 3. PEGA AQUÍ EL CÓDIGO DE TU MONEDA 💵 
+const CURRENCY_ID = 'ARS'; 
+
+// --- INICIALIZACIÓN Y LÓGICA ---
+
+// Inicializar el SDK de Mercado Pago
+MercadoPago\SDK::setAccessToken(ACCESS_TOKEN);
+
+// Establecer que la respuesta sea JSON (para que el frontend la entienda)
+header('Content-Type: application/json');
+
+// Leer los datos del carrito enviados desde el frontend
+$json_data = file_get_contents('php://input');
+$data = json_decode($json_data, true);
+$cart = $data['items'] ?? []; // Usamos 'items' como lo definimos en el frontend
 
 if (empty($cart)) {
     http_response_code(400);
-    echo json_encode(['error' => 'El carrito está vacío']);
+    echo json_encode(['error' => 'El carrito está vacío.']);
     exit;
 }
 
-// 2. Formatear los ítems para la API de Mercado Pago
-$itemsMP = [];
-$total = 0;
-$whatsappDetail = "¡Hola! Mi pago con MP fue aprobado. Mi pedido es:\n\n";
-
+// Formatear los ítems para la API de Mercado Pago
+$mp_items = [];
 foreach ($cart as $item) {
-    $subtotal = $item['price'] * $item['qty'];
-    $total += $subtotal;
-    
-    // Formato para API de Mercado Pago
-    $itemsMP[] = [
-        'title' => $item['name'] . ($item['units'] === '2' ? ' (x2)' : ''),
-        'unit_price' => (float)$item['price'],
-        'quantity' => (int)$item['qty'],
-        'currency_id' => 'ARS', // Reemplaza si es necesario
+    // Aseguramos que los nombres de los campos coincidan con la API de MP y el SDK
+    $mp_items[] = [
+        'title' => $item['name'],
+        'unit_price' => (float) $item['price'],
+        'quantity' => (int) $item['qty'],
+        'currency_id' => CURRENCY_ID,
     ];
-    
-    // Construcción del detalle para WhatsApp
-    $whatsappDetail .= "* " . $item['name'] . " x " . $item['qty'] . " uni. | $" . number_format($subtotal, 2) . "\n";
 }
 
-$whatsappDetail .= "\n*TOTAL PAGADO: $" . number_format($total, 2) . "*\n\n";
-$whatsappDetail .= "Adjunto el comprobante en el siguiente mensaje.";
+// Crear el objeto de Preferencia de Pago
+$preference = new MercadoPago\Preference();
+$preference->items = $mp_items;
 
-
-// 3. Crear el URL de Éxito de WhatsApp DINÁMICO
-// Usamos urlencode para que el mensaje sea válido en un URL
-$successUrl = "https://wa.me/{$WHATSAPP_NUMBER}?text=" . urlencode($whatsappDetail);
-
-
-// 4. Crear la Preferencia de Pago
-$preferenceData = [
-    'items' => $itemsMP,
-    'back_urls' => [
-        'success' => $successUrl,
-        'failure' => 'https://tu-sitio.com/checkout.html?status=failure', // URL a tu sitio en caso de fallo
-        'pending' => 'https://tu-sitio.com/checkout.html?status=pending', // URL a tu sitio en caso de pendiente
-    ],
-    'auto_return' => 'approved', // Redirigir automáticamente al éxito si el pago es aprobado
-    'external_reference' => 'ORDER-' . time(), // Referencia única de la orden
+// Definir las URLs de retorno simples a tu sitio
+$preference->back_urls = [
+    'success' => BASE_URL . '/pago-exitoso.html', 
+    'pending' => BASE_URL . '/pago-pendiente.html',
+    'failure' => BASE_URL . '/pago-fallido.html',
 ];
+$preference->auto_return = 'approved';
 
-// --- Inicia comunicación con la API de Mercado Pago ---
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, 'https://api.mercadopago.com/checkout/preferences');
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-curl_setopt($ch, CURLOPT_POST, 1);
-curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($preferenceData));
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'Authorization: Bearer ' . $ACCESS_TOKEN,
-    'Content-Type: application/json'
-]);
+try {
+    // 4. Enviar la preferencia a la API de Mercado Pago
+    $preference->save();
 
-$result = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-curl_close($ch);
-// --- Finaliza comunicación con la API de Mercado Pago ---
+    // 5. ¡DEVOLVER EL ID DE LA PREFERENCIA! (Lo que espera el frontend)
+    echo json_encode(['id' => $preference->id]);
 
-if ($httpCode === 201) {
-    $response = json_decode($result, true);
-    // Devuelve el URL de inicio de pago al frontend
-    echo json_encode([
-        'init_point' => $response['init_point'] // El URL de Mercado Pago
-    ]);
-} else {
+} catch (Exception $e) {
     // Manejo de errores
-    http_response_code($httpCode);
-    echo json_encode(['error' => 'Error al crear la preferencia en MP.', 'details' => json_decode($result, true)]);
+    http_response_code(500);
+    echo json_encode(['error' => 'Error al crear la preferencia con el SDK.', 'details' => $e->getMessage()]);
 }
-
 ?>
