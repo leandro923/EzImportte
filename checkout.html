@@ -1,505 +1,178 @@
-﻿<!DOCTYPE html>
+﻿<<!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Finalizar Compra - EZ.IMPORTTE</title>
-    <style>
-        /* --- estilos originales --- */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0
-        }
-
-        :root {
-            --primary: #8200ff;
-            --dark: #131313;
-            --light: #fff;
-            --gray: #aaa
-        }
-
-        body {
-            font-family: 'Inter',sans-serif;
-            background: var(--dark);
-            color: var(--light);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        a {
-            text-decoration: none;
-            color: inherit;
-        }
-
-        header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 20px;
-            background: rgba(19,19,19,0.85);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            position: sticky;
-            top: 0;
-            z-index: 200;
-        }
-
-        .header-title {
-            font-size: 24px;
-            font-weight: 900;
-            color: var(--primary);
-            margin-left: 8px;
-        }
-
-        .logo img {
-            height: 50px;
-            border-radius: 8px;
-        }
-
-        main {
-            max-width: 800px;
-            width: 100%;
-            margin: 30px auto;
-            padding: 0 20px;
-        }
-
-        h1 {
-            font-size: 32px;
-            font-weight: 900;
-            margin-bottom: 15px;
-            color: var(--primary);
-            text-shadow: 0 0 10px rgba(130,0,255,0.4);
-            text-align: center;
-        }
-
-        .order-summary {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(130, 0, 255,0.2);
-        }
-
-        .summary-header {
-            font-size: 1.2em;
-            font-weight: 700;
-            margin-bottom: 15px;
-            color: var(--light);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 10px;
-        }
-
-        #checkout-items {
-            margin-bottom: 15px;
-        }
-
-        .item-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px dashed rgba(255,255,255,0.05);
-            font-size: 14px;
-        }
-
-        .item-name {
-            flex: 1;
-            font-weight: 600;
-            padding-right: 10px;
-        }
-
-        .item-qty {
-            width: 50px;
-            text-align: center;
-            color: var(--gray);
-        }
-
-        .item-subtotal {
-            width: 80px;
-            text-align: right;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            padding-top: 15px;
-            border-top: 1px solid rgba(255,255,255,0.15);
-            font-size: 1.8em;
-            font-weight: 900;
-            color: var(--light);
-        }
-
-            .total-row span:last-child {
-                color: var(--primary);
-            }
-
-        .empty-message {
-            text-align: center;
-            padding: 20px;
-            color: var(--gray);
-            font-style: italic;
-        }
-
-        .payment-options {
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-            align-items: center;
-            text-align: center;
-        }
-
-            .payment-options button {
-                width: 90%;
-                max-width: 330px;
-                padding: 14px 20px;
-                border: none;
-                border-radius: 10px;
-                font-size: 17px;
-                font-weight: 700;
-                cursor: pointer;
-                transition: 0.25s ease;
-                letter-spacing: 0.5px;
-                transform: translateY(0);
-            }
-
-                .payment-options button:disabled {
-                    opacity: 0.5;
-                    cursor: not-allowed;
-                    transform: none;
-                    box-shadow: none !important;
-                }
-        /* El contenedor del MP lo estilamos para que se parezca a los botones */
-        #wallet_container {
-            width: 90%;
-            max-width: 330px;
-            height: auto;
-            min-height: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        /* No necesitamos estilos para #btn-mercadopago */
-        #btn-transferencia {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 4px 12px rgba(130,0,255,0.4);
-        }
-
-            #btn-transferencia:hover:not(:disabled) {
-                background: #6900cc;
-                transform: translateY(-3px);
-            }
-
-        #btn-efectivo {
-            background: #3ebaff;
-            color: #000;
-            box-shadow: 0 4px 12px rgba(62,186,255,0.4);
-        }
-
-            #btn-efectivo:hover:not(:disabled) {
-                background: #129de8;
-                transform: translateY(-3px);
-            }
-
-        footer {
-            text-align: center;
-            padding: 15px 0;
-            font-size: 14px;
-            color: #aaa;
-            border-top: 1px solid rgba(255,255,255,0.07);
-            margin-top: auto;
-        }
-
-        #transfer-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.6);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 300;
-        }
-
-            #transfer-modal.active {
-                display: flex;
-            }
-
-            #transfer-modal .modal-content {
-                position: relative;
-                background: rgba(255,255,255,0.15);
-                backdrop-filter: blur(14px);
-                border: 1px solid rgba(255,255,255,0.2);
-                color: white;
-                padding: 30px 28px;
-                border-radius: 14px;
-                text-align: center;
-                width: 90%;
-                max-width: 420px;
-                box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-                animation: fadeUp 0.25s ease;
-            }
-
-        @keyframes fadeUp {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        #transfer-modal h2 {
-            color: var(--primary);
-            margin-bottom: 15px;
-            font-weight: 900;
-        }
-
-        #transfer-modal p {
-            font-size: 16px;
-            margin: 10px 0;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 12px;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 26px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-            .close-btn:hover {
-                color: var(--primary);
-                transform: scale(1.2);
-            }
-
-        #transfer-modal button.upload-btn {
-            background: var(--primary);
-            color: #fff;
-            padding: 12px 18px;
-            border: none;
-            border-radius: 10px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-            #transfer-modal button.upload-btn:hover {
-                background: #6900cc;
-                transform: translateY(-2px);
-            }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finalizar Compra - EZ.IMPORTTE</title>
+<style>
+/* --- estilos originales --- */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--primary:#8200ff;--dark:#131313;--light:#fff;--gray:#aaa}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--light);min-height:100vh;display:flex;flex-direction:column;}
+a{text-decoration:none;color:inherit;}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:rgba(19,19,19,0.85);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,0.05);position:sticky;top:0;z-index:200;}
+.header-title{font-size:24px;font-weight:900;color:var(--primary);margin-left:8px;}
+.logo img{height:50px;border-radius:8px;}
+main{max-width:800px;width:100%;margin:30px auto;padding:0 20px;}
+h1{font-size:32px;font-weight:900;margin-bottom:15px;color:var(--primary);text-shadow:0 0 10px rgba(130,0,255,0.4);text-align:center;}
+.order-summary{background:rgba(255, 255, 255, 0.05);border-radius:10px;padding:20px;margin-bottom:30px;border:1px solid rgba(130, 0, 255,0.2);}
+.summary-header{font-size:1.2em;font-weight:700;margin-bottom:15px;color:var(--light);border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:10px;}
+#checkout-items{margin-bottom:15px;}
+.item-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed rgba(255,255,255,0.05);font-size:14px;}
+.item-name{flex:1;font-weight:600;padding-right:10px;}
+.item-qty{width:50px;text-align:center;color:var(--gray);}
+.item-subtotal{width:80px;text-align:right;font-weight:700;color:var(--primary);}
+.total-row{display:flex;justify-content:space-between;padding-top:15px;border-top:1px solid rgba(255,255,255,0.15);font-size:1.8em;font-weight:900;color:var(--light);}
+.total-row span:last-child{color:var(--primary);}
+.empty-message{text-align:center;padding:20px;color:var(--gray);font-style:italic;}
+.payment-options{display:flex;flex-direction:column;gap:18px;align-items:center;text-align:center;}
+.payment-options button{width:90%;max-width:330px;padding:14px 20px;border:none;border-radius:10px;font-size:17px;font-weight:700;cursor:pointer;transition:0.25s ease;letter-spacing:0.5px;transform:translateY(0);}
+.payment-options button:disabled{opacity:0.5;cursor:not-allowed;transform:none;box-shadow:none !important;}
+#btn-mercadopago{background:#ffce00;color:#000;box-shadow:0 4px 12px rgba(255,206,0,0.3);}
+#btn-mercadopago:hover:not(:disabled){background:#e5b800;transform:translateY(-3px);}
+#btn-transferencia{background:var(--primary);color:white;box-shadow:0 4px 12px rgba(130,0,255,0.4);}
+#btn-transferencia:hover:not(:disabled){background:#6900cc;transform:translateY(-3px);}
+#btn-efectivo{background:#3ebaff;color:#000;box-shadow:0 4px 12px rgba(62,186,255,0.4);}
+#btn-efectivo:hover:not(:disabled){background:#129de8;transform:translateY(-3px);}
+footer{text-align:center;padding:15px 0;font-size:14px;color:#aaa;border-top:1px solid rgba(255,255,255,0.07);margin-top:auto;}
+#transfer-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:300;}
+#transfer-modal.active{display:flex;}
+#transfer-modal .modal-content{position:relative;background:rgba(255,255,255,0.15);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,0.2);color:white;padding:30px 28px;border-radius:14px;text-align:center;width:90%;max-width:420px;box-shadow:0 8px 20px rgba(0,0,0,0.4);animation:fadeUp 0.25s ease;}
+@keyframes fadeUp{from{transform:translateY(20px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+#transfer-modal h2{color:var(--primary);margin-bottom:15px;font-weight:900;}
+#transfer-modal p{font-size:16px;margin:10px 0;}
+.close-btn{position:absolute;top:10px;right:12px;background:none;border:none;color:white;font-size:26px;cursor:pointer;transition:0.2s;}
+.close-btn:hover{color:var(--primary);transform:scale(1.2);}
+#transfer-modal button.upload-btn{background:var(--primary);color:#fff;padding:12px 18px;border:none;border-radius:10px;font-weight:700;cursor:pointer;transition:0.2s;}
+#transfer-modal button.upload-btn:hover{background:#6900cc;transform:translateY(-2px);}
+</style>
 </head>
 <body>
 
-    <header>
-        <div style="display:flex; align-items:center;">
-            <div class="logo"><img src="logo.jpg" alt="Logo EZ.IMPORTTE"></div>
-            <div class="header-title">EZ.IMPORTTE</div>
-        </div>
-    </header>
+<header>
+<div style="display:flex; align-items:center;">
+<div class="logo"><img src="logo.jpg" alt="Logo EZ.IMPORTTE"></div>
+<div class="header-title">EZ.IMPORTTE</div>
+</div>
+</header>
 
-    <main>
-        <h1>Finalizar Compra</h1>
+<main>
+<h1>Finalizar Compra</h1>
 
-        <div class="order-summary">
-            <div class="summary-header">Resumen de la Orden</div>
-            <div id="checkout-items"><p class="empty-message">Cargando detalles del carrito...</p></div>
-            <div class="total-row"><span>Total:</span><span id="display-total">$0</span></div>
-        </div>
+<div class="order-summary">
+<div class="summary-header">Resumen de la Orden</div>
+<div id="checkout-items"><p class="empty-message">Cargando detalles del carrito...</p></div>
+<div class="total-row"><span>Total:</span><span id="display-total">$0</span></div>
+</div>
 
-        <div class="payment-options">
-            <div id="wallet_container"></div>
+<div class="payment-options">
+<button id="btn-mercadopago">Pagar con Mercado Pago</button>
+<button id="btn-transferencia">Pagar por Transferencia</button>
+<button id="btn-efectivo">Pagar en Efectivo (WhatsApp)</button>
+</div>
+</main>
 
-            <button id="btn-transferencia">Pagar por Transferencia</button>
-            <button id="btn-efectivo">Pagar en Efectivo (WhatsApp)</button>
-        </div>
-    </main>
+<div id="transfer-modal">
+<div class="modal-content">
+<button class="close-btn" aria-label="Cerrar">&times;</button>
+<h2>Datos para Transferencia</h2>
+<p><strong>Billetera:</strong> Mercado Pago</p>
+<p><strong>Titular:</strong> Ezequiel Acuña</p>
+<p><strong>CBU:</strong> 0000003100092373582517</p>
+<p><strong>Alias:</strong> ezequielacuna.mp</p>
+<p>Sube tu comprobante de transferencia:</p>
+<button id="upload-widget-btn" class="upload-btn">Seleccionar Comprobante</button>
+</div>
+</div>
 
-    <div id="transfer-modal">
-        <div class="modal-content">
-            <button class="close-btn" aria-label="Cerrar">&times;</button>
-            <h2>Datos para Transferencia</h2>
-            <p><strong>Billetera:</strong> Mercado Pago</p>
-            <p><strong>Titular:</strong> Ezequiel Acuña</p>
-            <p><strong>CBU:</strong> 0000003100092373582517</p>
-            <p><strong>Alias:</strong> ezequielacuna.mp</p>
-            <p>Sube tu comprobante de transferencia:</p>
-            <button id="upload-widget-btn" class="upload-btn">Seleccionar Comprobante</button>
-        </div>
-    </div>
+<footer>&copy; 2025 EZ.IMPORTTE - Todos los derechos reservados</footer>
 
-    <footer>&copy; 2025 EZ.IMPORTTE - Todos los derechos reservados</footer>
+<script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script>
+<script>
+// Configuración
+const displayTotalEl = document.getElementById("display-total");
+const checkoutItemsEl = document.getElementById("checkout-items");
+const btnEfectivo = document.getElementById("btn-efectivo");
+const btnMercadoPago = document.getElementById("btn-mercadopago");
+const btnTransferencia = document.getElementById("btn-transferencia");
+const transferModal = document.getElementById("transfer-modal");
+const closeModalBtn = transferModal.querySelector('.close-btn');
+const uploadBtn = document.getElementById('upload-widget-btn');
 
-    <script src="https://sdk.mercadopago.com/js/v2"></script>
-    <script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script>
-    <script>
-        // Configuración
-        const displayTotalEl = document.getElementById("display-total");
-        const checkoutItemsEl = document.getElementById("checkout-items");
-        const btnEfectivo = document.getElementById("btn-efectivo");
-        // Eliminamos la referencia a btnMercadoPago ya que ahora es un div:
-        const walletContainer = document.getElementById("wallet_container");
-        const btnTransferencia = document.getElementById("btn-transferencia");
-        const transferModal = document.getElementById("transfer-modal");
-        const closeModalBtn = transferModal.querySelector('.close-btn');
-        const uploadBtn = document.getElementById('upload-widget-btn');
+const WHATSAPP_NUMBER = "543434571408";
 
-        const WHATSAPP_NUMBER = "543434571408";
+// Carrito
+const storedCart = localStorage.getItem('ezimportte_cart');
+let cart = [];
+let finalTotal = 0;
+if(storedCart){ try{cart = JSON.parse(storedCart);}catch(e){console.error(e);} }
+function renderOrderSummary(){
+checkoutItemsEl.innerHTML='';
+if(cart.length===0){
+checkoutItemsEl.innerHTML='<p class="empty-message">No se encontraron productos en el carrito.</p>';
+displayTotalEl.textContent='$0';
+btnEfectivo.disabled = btnMercadoPago.disabled = btnTransferencia.disabled = true;
+return;
+}
+finalTotal=0;
+cart.forEach(item=>{
+const subtotal=item.price*item.qty; finalTotal+=subtotal;
+const unitLabel = item.units==='2'?' (x2)':' (x1 c/u)';
+const row=document.createElement('div'); row.className='item-row';
+row.innerHTML=`<span class="item-name">${item.name}${unitLabel}</span>
+<span class="item-qty">${item.qty} uni.</span>
+<span class="item-subtotal">$${subtotal.toLocaleString()}</span>`;
+checkoutItemsEl.appendChild(row);
+});
+displayTotalEl.textContent=`$${finalTotal.toLocaleString()}`;
+}
+renderOrderSummary();
 
-        // Carrito
-        const storedCart = localStorage.getItem('ezimportte_cart');
-        let cart = [];
-        let finalTotal = 0;
-        if (storedCart) { try { cart = JSON.parse(storedCart); } catch (e) { console.error(e); } }
+// Botón Mercado Pago
+btnMercadoPago.addEventListener('click',()=>{alert('Integración Mercado Pago aquí');});
 
-        function renderOrderSummary() {
-            checkoutItemsEl.innerHTML = '';
-            if (cart.length === 0) {
-                checkoutItemsEl.innerHTML = '<p class="empty-message">No se encontraron productos en el carrito.</p>';
-                displayTotalEl.textContent = '$0';
-                // Deshabilitamos todos los métodos de pago si el carrito está vacío
-                btnEfectivo.disabled = btnTransferencia.disabled = true;
-                // Ocultamos el contenedor de MP si está vacío
-                walletContainer.style.display = 'none';
-                return;
-            }
-            finalTotal = 0;
-            cart.forEach(item => {
-                const subtotal = item.price * item.qty; finalTotal += subtotal;
-                const unitLabel = item.units === '2' ? ' (x2)' : ' (x1 c/u)';
-                const row = document.createElement('div'); row.className = 'item-row';
-                row.innerHTML = `<span class="item-name">${item.name}${unitLabel}</span>
-            <span class="item-qty">${item.qty} uni.</span>
-            <span class="item-subtotal">$${subtotal.toLocaleString()}</span>`;
-                checkoutItemsEl.appendChild(row);
-            });
-            displayTotalEl.textContent = `$${finalTotal.toLocaleString()}`;
+// Botón Efectivo/WhatsApp
+btnEfectivo.addEventListener('click',()=>{
+let msg="¡Hola! Quiero confirmar mi pedido y pagar en efectivo/transferencia. Los detalles son:\n\n";
+cart.forEach(item=>{
+const subtotal=item.price*item.qty;
+const unitLabel=item.units==='2'?'x2':'x1 c/u';
+msg+=`* ${item.name} (${unitLabel}) x ${item.qty} uni.: $${subtotal.toLocaleString()}\n`;
+});
+msg+=`\n*TOTAL A PAGAR: $${finalTotal.toLocaleString()}*`;
+msg+="\n\nPor favor, confírmame el punto de entrega y los pasos a seguir.";
+const url=`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+window.open(url,"_blank");
+});
 
-            // Si hay productos, inicializamos el checkout de Mercado Pago
-            createPreferenceAndRender();
-        }
+// Botón Transferencia
+btnTransferencia.addEventListener('click',()=>{transferModal.classList.add('active');});
+closeModalBtn.addEventListener('click',()=>{transferModal.classList.remove('active');});
+transferModal.addEventListener('click',(e)=>{if(e.target===transferModal) transferModal.classList.remove('active');});
 
-        // --------------------------------------------------------------------------------------------------
-        // LÓGICA DE MERCADO PAGO CHECKOUT PRO
-        // --------------------------------------------------------------------------------------------------
-
-        // ⚠️ REEMPLAZA 'TU_PUBLIC_KEY_AQUI' con tu Public Key de Mercado Pago
-        const PUBLIC_KEY = 'APP_USR-92a3d4a8-ceb7-485c-b28a-d5b67d45d2b5';
-
-        // 1. Inicializa el SDK de Mercado Pago
-        const mp = new MercadoPago(PUBLIC_KEY, {
-            locale: 'es-AR' // Ajusta a tu localización (e.g., es-MX, pt-BR)
+// Cloudinary Upload Widget
+const myWidget = cloudinary.createUploadWidget({
+    cloudName: 'dtaocbdr2',       // reemplazar con tu Cloud name
+uploadPreset: 'public_transfer', // reemplazar con tu upload preset en Cloudinary
+sources: ['local','url','camera'],
+multiple: false,
+resourceType: 'auto',
+}, (error, result) => {
+    if (!error && result && result.event === "success") {
+        const fileUrl = result.info.secure_url;
+        let msg = "¡Hola! Confirmo mi pago por transferencia. Detalles de la orden:\n\n";
+        cart.forEach(item=>{
+            const unitLabel = item.units==='2'?'x2':'x1 c/u';
+            msg+=`* ${item.name} (${unitLabel}) x ${item.qty} uni.: $${(item.price*item.qty).toLocaleString()}\n`;
         });
-
-        // 2. Función para renderizar el botón
-        const renderCheckoutButton = (preferenceId) => {
-            const bricksBuilder = mp.bricks();
-
-            bricksBuilder.create("wallet", "wallet_container", { // 'wallet_container' es el ID del div
-                initialization: {
-                    preferenceId: preferenceId, // ID que viene de tu Backend
-                },
-                customization: {
-                    // Opcional: para que se vea como un botón de pago rápido
-                    texts: {
-                        valueProp: 'smart_option',
-                    },
-                }
-            });
-        };
-
-        // 3. Función principal para crear la preferencia
-        async function createPreferenceAndRender() {
-            if (cart.length === 0) return; // Ya se maneja en renderOrderSummary
-
-            try {
-                // ⚠️ DEBES ASEGURARTE DE QUE ESTE ENDPOINT EXISTA EN TU SERVIDOR
-                const response = await fetch("/api/create_mp_preference", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    // Le envías los datos del carrito a tu backend para que cree la preferencia
-                    body: JSON.stringify({ items: cart, total: finalTotal })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Error en el servidor: ${response.statusText}`);
-                }
-
-                const preference = await response.json();
-
-                if (preference && preference.id) {
-                    renderCheckoutButton(preference.id);
-                } else {
-                    walletContainer.innerHTML = '<button disabled style="background:#444;">Error al obtener datos de MP</button>';
-                }
-
-            } catch (error) {
-                console.error("Error al crear la preferencia de pago:", error);
-                walletContainer.innerHTML = '<button disabled style="background:#444;">Error de conexión (MP)</button>';
-            }
-        }
-        // --------------------------------------------------------------------------------------------------
-
-
-        renderOrderSummary(); // Llama a la función que renderiza los ítems e inicializa MP si hay carrito
-
-        // Botón Efectivo/WhatsApp
-        btnEfectivo.addEventListener('click', () => {
-            let msg = "¡Hola! Quiero confirmar mi pedido y pagar en efectivo/transferencia. Los detalles son:\n\n";
-            cart.forEach(item => {
-                const subtotal = item.price * item.qty;
-                const unitLabel = item.units === '2' ? 'x2' : 'x1 c/u';
-                msg += `* ${item.name} (${unitLabel}) x ${item.qty} uni.: $${subtotal.toLocaleString()}\n`;
-            });
-            msg += `\n*TOTAL A PAGAR: $${finalTotal.toLocaleString()}*`;
-            msg += "\n\nPor favor, confírmame el punto de entrega y los pasos a seguir.";
-            const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-            window.open(url, "_blank");
-        });
-
-        // Botón Transferencia
-        btnTransferencia.addEventListener('click', () => { transferModal.classList.add('active'); });
-        closeModalBtn.addEventListener('click', () => { transferModal.classList.remove('active'); });
-        transferModal.addEventListener('click', (e) => { if (e.target === transferModal) transferModal.classList.remove('active'); });
-
-        // Cloudinary Upload Widget
-        const myWidget = cloudinary.createUploadWidget({
-            cloudName: 'dtaocbdr2',       // reemplazar con tu Cloud name
-            uploadPreset: 'public_transfer', // reemplazar con tu upload preset en Cloudinary
-            sources: ['local', 'url', 'camera'],
-            multiple: false,
-            resourceType: 'auto',
-        }, (error, result) => {
-            if (!error && result && result.event === "success") {
-                const fileUrl = result.info.secure_url;
-                let msg = "¡Hola! Confirmo mi pago por transferencia. Detalles de la orden:\n\n";
-                cart.forEach(item => {
-                    const unitLabel = item.units === '2' ? 'x2' : 'x1 c/u';
-                    msg += `* ${item.name} (${unitLabel}) x ${item.qty} uni.: $${(item.price * item.qty).toLocaleString()}\n`;
-                });
-                msg += `\n*TOTAL A PAGAR: $${finalTotal.toLocaleString()}*\n`;
-                msg += `\nComprobante: ${fileUrl}`;
-                const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-                window.open(waUrl, "_blank");
-                transferModal.classList.remove('active');
-            }
-        });
-        uploadBtn.addEventListener('click', () => { myWidget.open(); }, false);
-    </script>
+        msg+=`\n*TOTAL A PAGAR: $${finalTotal.toLocaleString()}*\n`;
+        msg+=`\nComprobante: ${fileUrl}`;
+        const waUrl=`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+        window.open(waUrl,"_blank");
+        transferModal.classList.remove('active');
+    }
+});
+uploadBtn.addEventListener('click',()=>{myWidget.open();}, false);
+</script>
 </body>
 </html>
