@@ -1110,27 +1110,4 @@
             }
 
             // 🔑 PASO CLAVE: Guardar el array 'cart' en localStorage
-            // Lo convertimos a una cadena JSON para que localStorage pueda almacenarlo
-            localStorage.setItem('ezimportte_cart', JSON.stringify(cart));
-
-            const total = cart.reduce((sum, i) => sum + (i.qty * i.price), 0);
-
-            // Redirigir a la página de pago. Le pasamos el total por si acaso, pero los detalles ya están en localStorage.
-            window.location.href = "checkout.html?total=" + total;
-        });
-
-
-        if (product.comingSoon) {
-            const label = document.createElement('span');
-            label.classList.add('soon-label');
-            label.textContent = '🚀 Próximamente';
-            card.appendChild(label);
-        }
-
-        // Inicializar al cargar
-        updateCartCount();
-    </script>
-
-</body>
-
-</html>
+            
