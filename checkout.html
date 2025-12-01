@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -89,7 +89,8 @@ footer{text-align:center;padding:15px 0;font-size:14px;color:#aaa;border-top:1px
 
 <script src="https://widget.cloudinary.com/v2.0/global/all.js" type="text/javascript"></script>
 <script>
-// Configuración
+/* ------------- LÓGICA CHECKOUT ------------- */
+
 const displayTotalEl = document.getElementById("display-total");
 const checkoutItemsEl = document.getElementById("checkout-items");
 const btnEfectivo = document.getElementById("btn-efectivo");
@@ -101,79 +102,141 @@ const uploadBtn = document.getElementById('upload-widget-btn');
 
 const WHATSAPP_NUMBER = "543434571408";
 
-// Carrito
 const storedCart = localStorage.getItem('ezimportte_cart');
 let cart = [];
 let finalTotal = 0;
-if(storedCart){ try{cart = JSON.parse(storedCart);}catch(e){console.error(e);} }
+
+if(storedCart){
+    try { cart = JSON.parse(storedCart); }
+    catch(e){ console.error(e); }
+}
+
 function renderOrderSummary(){
-checkoutItemsEl.innerHTML='';
-if(cart.length===0){
-checkoutItemsEl.innerHTML='<p class="empty-message">No se encontraron productos en el carrito.</p>';
-displayTotalEl.textContent='$0';
-btnEfectivo.disabled = btnMercadoPago.disabled = btnTransferencia.disabled = true;
-return;
+    checkoutItemsEl.innerHTML='';
+
+    if(cart.length===0){
+        checkoutItemsEl.innerHTML='<p class="empty-message">No se encontraron productos en el carrito.</p>';
+        displayTotalEl.textContent='$0';
+        btnEfectivo.disabled = btnMercadoPago.disabled = btnTransferencia.disabled = true;
+        return;
+    }
+
+    finalTotal = 0;
+
+    cart.forEach(item=>{
+        const subtotal = item.price * item.qty;
+        finalTotal += subtotal;
+
+        const unitLabel = item.units==='2' ? ' (x2)' : ' (x1 c/u)';
+        const row = document.createElement('div');
+        row.className='item-row';
+
+        row.innerHTML = `
+            <span class="item-name">${item.name}${unitLabel}</span>
+            <span class="item-qty">${item.qty} uni.</span>
+            <span class="item-subtotal">$${subtotal.toLocaleString()}</span>
+        `;
+
+        checkoutItemsEl.appendChild(row);
+
+        /* ⭐ MOSTRAR ENVÍO SI TIENE ENVÍO INCLUIDO (SOLO VAPERS X1 QTY 1) */
+        if(item.shipping === 5000){
+            const shipRow = document.createElement('div');
+            shipRow.className = "item-row";
+            shipRow.innerHTML = `
+                <span class="item-name">Envío</span>
+                <span class="item-qty">-</span>
+                <span class="item-subtotal">$5.000</span>
+            `;
+            checkoutItemsEl.appendChild(shipRow);
+        }
+    });
+
+    displayTotalEl.textContent = `$${finalTotal.toLocaleString()}`;
 }
-finalTotal=0;
-cart.forEach(item=>{
-const subtotal=item.price*item.qty; finalTotal+=subtotal;
-const unitLabel = item.units==='2'?' (x2)':' (x1 c/u)';
-const row=document.createElement('div'); row.className='item-row';
-row.innerHTML=`<span class="item-name">${item.name}${unitLabel}</span>
-<span class="item-qty">${item.qty} uni.</span>
-<span class="item-subtotal">$${subtotal.toLocaleString()}</span>`;
-checkoutItemsEl.appendChild(row);
-});
-displayTotalEl.textContent=`$${finalTotal.toLocaleString()}`;
-}
+
 renderOrderSummary();
 
-// Botón Mercado Pago
-btnMercadoPago.addEventListener('click',()=>{alert('Integración Mercado Pago aquí');});
-
-// Botón Efectivo/WhatsApp
-btnEfectivo.addEventListener('click',()=>{
-let msg="¡Hola! Quiero confirmar mi pedido y pagar en efectivo. Los detalles son:\n\n";
-cart.forEach(item=>{
-const subtotal=item.price*item.qty;
-const unitLabel=item.units==='2'?'x2':'x1 c/u';
-msg+=`* ${item.name} (${unitLabel}) x ${item.qty} uni.: $${subtotal.toLocaleString()}\n`;
-});
-msg+=`\n*TOTAL A PAGAR: $${finalTotal.toLocaleString()}*`;
-msg+="\n\nPor favor, confírmame el punto de entrega y los pasos a buscar.";
-const url=`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-window.open(url,"_blank");
+/* -------- Botón Mercado Pago -------- */
+btnMercadoPago.addEventListener('click', ()=>{
+    alert('Integración Mercado Pago aquí');
 });
 
-// Botón Transferencia
-btnTransferencia.addEventListener('click',()=>{transferModal.classList.add('active');});
-closeModalBtn.addEventListener('click',()=>{transferModal.classList.remove('active');});
-transferModal.addEventListener('click',(e)=>{if(e.target===transferModal) transferModal.classList.remove('active');});
+/* -------- Botón Efectivo / WhatsApp -------- */
+btnEfectivo.addEventListener('click', ()=>{
 
-// Cloudinary Upload Widget
+    let msg="¡Hola! Quiero confirmar mi pedido y pagar en efectivo. Los detalles son:\n\n";
+
+    cart.forEach(item=>{
+        const subtotal=item.price*item.qty;
+        const unitLabel=item.units==='2'?'x2':'x1 c/u';
+        msg+=`* ${item.name} (${unitLabel}) x ${item.qty} uni.: $${subtotal.toLocaleString()}\n`;
+
+        if(item.shipping === 5000){
+            msg+=`  ➤ Envío: $5.000\n`;
+        }
+    });
+
+    msg+=`\n*TOTAL A PAGAR: $${finalTotal.toLocaleString()}*`;
+    msg+="\n\nPor favor, confírmame el punto de entrega y los pasos a buscar.";
+
+    const url=`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+    window.open(url,"_blank");
+});
+
+/* -------- Botón Transferencia -------- */
+
+btnTransferencia.addEventListener('click', ()=>{
+    transferModal.classList.add('active');
+});
+
+closeModalBtn.addEventListener('click', ()=>{
+    transferModal.classList.remove('active');
+});
+
+transferModal.addEventListener('click',(e)=>{
+    if(e.target===transferModal) transferModal.classList.remove('active');
+});
+
+/* -------- Cloudinary Upload Widget -------- */
+
 const myWidget = cloudinary.createUploadWidget({
-    cloudName: 'dtaocbdr2',       // reemplazar con tu Cloud name
-uploadPreset: 'public_transfer', // reemplazar con tu upload preset en Cloudinary
-sources: ['local','url','camera'],
-multiple: false,
-resourceType: 'auto',
-}, (error, result) => {
-    if (!error && result && result.event === "success") {
-        const fileUrl = result.info.secure_url;
-        let msg = "¡Hola! Confirmo mi pago por transferencia. Detalles de la orden:\n\n";
+    cloudName: 'dtaocbdr2',
+    uploadPreset: 'public_transfer',
+    sources: ['local','url','camera'],
+    multiple: false,
+    resourceType: 'auto',
+}, (error, result)=>{
+    if(!error && result && result.event==="success"){
+
+        const fileUrl=result.info.secure_url;
+
+        let msg="¡Hola! Confirmo mi pago por transferencia. Detalles:\n\n";
+        
         cart.forEach(item=>{
-            const unitLabel = item.units==='2'?'x2':'x1 c/u';
+            const unitLabel=item.units==='2'?'x2':'x1 c/u';
             msg+=`* ${item.name} (${unitLabel}) x ${item.qty} uni.: $${(item.price*item.qty).toLocaleString()}\n`;
+
+            if(item.shipping === 5000){
+                msg+=`  ➤ Envío: $5.000\n`;
+            }
         });
+
         msg+=`\n*TOTAL A PAGAR: $${finalTotal.toLocaleString()}*\n`;
         msg+=`\nComprobante: ${fileUrl}`;
+
         const waUrl=`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
         window.open(waUrl,"_blank");
+
         transferModal.classList.remove('active');
     }
 });
-uploadBtn.addEventListener('click',()=>{myWidget.open();}, false);
+
+uploadBtn.addEventListener('click',()=>{ myWidget.open(); }, false);
+
 </script>
+
 </body>
 </html>
+
 
